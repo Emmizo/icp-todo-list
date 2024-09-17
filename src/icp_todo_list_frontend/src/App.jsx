@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css'; // Import the stylesheet
 import { idlFactory as todoIdlFactory } from './todo_idl'; // Import your Motoko canister interface (IDL)
 
-const canisterId = "be2us-64aaa-aaaaa-qaabq-cai"; // Replace with your deployed canister ID
+const canisterId = "br5f7-7uaaa-aaaaa-qaaca-cai"; // Replace with your deployed canister ID
 // const agent = new HttpAgent({ host: "/api" }); // Localhost for local development
 
 const todoActor = Actor.createActor(todoIdlFactory, {
@@ -19,7 +19,12 @@ const App = () => {
 
   // Initialize agent and actor
   useEffect(() => {
-    const agent = new HttpAgent({ host: "https://ic0.app" }); // ICP's main host
+    const agent = new HttpAgent({ host: "http://localhost:3000" }); // ICP's main host
+    // You may need to disable certificate verification for local dev, especially in dev environments
+// if (process.env.NODE_ENV === "development") {
+//   agent.fetchRootKey(); // This will allow connections without strict SSL checks during local dev.
+// }
+
     const todoActor = Actor.createActor(todoIdlFactory, {
       agent,
       canisterId,
@@ -37,14 +42,14 @@ const App = () => {
   const addTodo = async (e) => {
     e.preventDefault(); // Prevent the form from submitting the traditional way
 
-    const agent = new HttpAgent({ host: "https://ic0.app" });
+    const agent = new HttpAgent({ host: "http://localhost:3000" });
     const todoActor = Actor.createActor(todoIdlFactory, {
       agent,
       canisterId,
     });
 
     // Add new Todo
-    await todoActor.addTodo(description, priority, new Date(deadline).getTime() * 1_000_000n);
+    await todoActor.addTodo(description, priority, BigInt(new Date(deadline).getTime()) * 1_000_000n);
     const todoList = await todoActor.getTodos();
     setTodos(todoList);
 

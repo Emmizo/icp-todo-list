@@ -27,7 +27,7 @@ actor TodoListCanister {
     return "Todo added";
   };
 
-  public func getTodos() : async [Todo] {
+  public query func getTodos() : async [Todo] {
     return todos;
   };
 
