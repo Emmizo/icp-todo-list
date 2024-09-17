@@ -1,18 +1,18 @@
 {
   "canisters": {
-    "icp-todo-list-backend": {
-      "main": "src/icp-todo-list-backend/main.mo",
+    "icp_todo_list_backend": {
+      "main": "src/icp_todo_list_backend/main.mo",
       "type": "motoko"
     },
-    "icp-todo-list-frontend": {
+    "icp_todo_list_frontend": {
       "dependencies": [
-        "icp-todo-list-backend"
+        "icp_todo_list_backend"
       ],
       "source": [
-        "src/icp-todo-list-frontend/dist"
+        "src/icp_todo_list_frontend/dist"
       ],
       "type": "assets",
-      "workspace": "icp-todo-list-frontend"
+      "workspace": "icp_todo_list_frontend"
     }
   },
   "defaults": {

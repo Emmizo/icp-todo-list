@@ -1,10 +1,10 @@
 {
-  "name": "icp-todo-list-frontend",
+  "name": "icp_todo_list_frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "setup": "npm i && dfx canister create icp-todo-list-backend && dfx generate icp-todo-list-backend && dfx deploy",
+    "setup": "npm i && dfx canister create icp_todo_list_backend && dfx generate icp_todo_list_backend && dfx deploy",
     "start": "vite --port 3000",
     "prebuild": "dfx generate",
     "build": "tsc && vite build",
