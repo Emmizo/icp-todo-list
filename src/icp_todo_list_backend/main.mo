@@ -14,7 +14,26 @@ actor TodoListCanister {
   private var todos : [Todo] = [];
   private var nextId : Nat = 0;
 
+  private func findTodoIndex(id : Nat) : ?Nat {
+    Array.indexOf<Todo>(
+      todos,
+      {
+        id = id;
+        description = "";
+        priority = "";
+        deadline = 0;
+        completed = false;
+      },
+      func(todo1 : Todo, todo2 : Todo) : Bool {
+        todo1.id == todo2.id;
+      },
+    );
+  };
+
   public func addTodo(description : Text, priority : Text, deadline : Time.Time) : async Text {
+    if (priority != "Low" and priority != "Medium" and priority != "High") {
+      return "Invalid priority value";
+    };
     let newTodo = {
       id = nextId;
       description = description;
@@ -22,7 +41,7 @@ actor TodoListCanister {
       deadline = deadline;
       completed = false;
     };
-    todos := Array.append(todos, [newTodo]);
+    todos := Array.append<Todo>(todos, [newTodo]);
     nextId += 1;
     return "Todo added";
   };
@@ -32,40 +51,10 @@ actor TodoListCanister {
   };
 
   public func completeTodo(id : Nat) : async Text {
-    // Find the index of the Todo with the given id
-    let indexOpt = Array.indexOf<Todo>(
-      {
-        id = id;
-        description = "";
-        priority = "";
-        deadline = 0;
-        completed = false;
-      },
-      todos,
-      func(todo1 : Todo, todo2 : Todo) : Bool {
-        todo1.id == todo2.id;
-      },
-    );
-
+    let indexOpt = findTodoIndex(id);
     switch (indexOpt) {
-      case (?_i) {
-        // Create a new array with the updated Todo
-        let updatedTodos = Array.map<Todo, Todo>(
-          todos,
-          func(todo : Todo) : Todo {
-            if (todo.id == id) {
-              return {
-                id = todo.id;
-                description = todo.description;
-                priority = todo.priority;
-                deadline = todo.deadline;
-                completed = true; // Mark as completed
-              };
-            };
-            todo // Return unchanged if it's not the target todo
-          },
-        );
-        todos := updatedTodos;
+      case (?index) {
+        todos[index] := { todos[index] with completed = true };
         return "Todo marked as completed";
       };
       case null {
@@ -75,7 +64,6 @@ actor TodoListCanister {
   };
 
   public func removeTodo(id : Nat) : async Text {
-    // Filter out the Todo with the given id
     todos := Array.filter<Todo>(
       todos,
       func(todo : Todo) : Bool {
@@ -86,49 +74,27 @@ actor TodoListCanister {
   };
 
   public func editTodo(id : Nat, newDescription : ?Text, newPriority : ?Text, newDeadline : ?Time.Time) : async Text {
-    // Find the index of the Todo with the given id
-    let indexOpt = Array.indexOf<Todo>(
-      {
-        id = id;
-        description = "";
-        priority = "";
-        deadline = 0;
-        completed = false;
-      },
-      todos,
-      func(todo1 : Todo, todo2 : Todo) : Bool {
-        todo1.id == todo2.id;
-      },
-    );
-
+    let indexOpt = findTodoIndex(id);
     switch (indexOpt) {
-      case (?_i) {
-        // Create a new array with the updated Todo
-        let updatedTodos = Array.map<Todo, Todo>(
-          todos,
-          func(todo : Todo) : Todo {
-            if (todo.id == id) {
-              return {
-                id = todo.id;
-                description = switch (newDescription) {
-                  case (?d) d;
-                  case null todo.description;
-                };
-                priority = switch (newPriority) {
-                  case (?p) p;
-                  case null todo.priority;
-                };
-                deadline = switch (newDeadline) {
-                  case (?d) d;
-                  case null todo.deadline;
-                };
-                completed = todo.completed;
-              };
-            };
-            todo // Return unchanged if it's not the target todo
-          },
-        );
-        todos := updatedTodos;
+      case (?index) {
+        if (newPriority != null and newPriority != ?("Low") and newPriority != ?("Medium") and newPriority != ?("High")) {
+          return "Invalid priority value";
+        };
+        todos[index] := {
+          todos[index] with
+          description = switch (newDescription) {
+            case (?d) d;
+            case null todos[index].description;
+          };
+          priority = switch (newPriority) {
+            case (?p) p;
+            case null todos[index].priority;
+          };
+          deadline = switch (newDeadline) {
+            case (?d) d;
+            case null todos[index].deadline;
+          };
+        };
         return "Todo edited";
       };
       case null {
@@ -136,4 +102,8 @@ actor TodoListCanister {
       };
     };
   };
+
+  // private _stream : Stream; // Commented out as Stream is unbound
+  private _stream : Stream;
+
 };
